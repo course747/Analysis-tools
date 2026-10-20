@@ -46,6 +46,8 @@ function mapAd(a) {
   const iurl = im.original_image_url || im.resized_image_url || c.original_image_url || c.resized_image_url || c.originalImageUrl;
   const thumb = v.video_preview_image_url || v.videoPreviewImageUrl || c.video_preview_image_url || iurl || "";
   const active = a.isActive ?? a.is_active;
+  const pid = a.pageID || a.pageId || a.page_id || s.page_id || s.pageId;
+  const page = s.page_profile_uri || s.pageProfileUri || (pid ? "https://www.facebook.com/" + pid : "");
   const lib = id ? "https://www.facebook.com/ads/library/?id=" + id : "";
   return {
     brand: a.pageName || a.page_name || s.page_name || s.pageName || "—",
@@ -54,8 +56,8 @@ function mapAd(a) {
     active: active === undefined ? !(a.endDate || a.end_date) : !!active,
     start: a.startDateFormatted || a.startDate || a.start_date || "",
     lib,
-    url: vurl || iurl || lib || s.link_url || s.page_profile_uri || "",
-    page: s.page_profile_uri || "",
+    url: page || lib,
+    media: vurl || iurl || "",
     thumb,
   };
 }
