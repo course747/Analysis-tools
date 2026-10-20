@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Ad Spy Tool</title>
+<style>
+:root{--bg:#f6f7fb;--card:#fff;--tx:#14171f;--mut:#667085;--bd:#e3e6ee;--ac:#4f46e5;--ok:#16a34a;--no:#9ca3af;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media(prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0f1117;--card:#1a1d27;--tx:#eef0f6;--mut:#9aa3b5;--bd:#2a2f3d;--ac:#818cf8;--ok:#4ade80;--no:#6b7280}}
+:root[data-theme="dark"]{--bg:#0f1117;--card:#1a1d27;--tx:#eef0f6;--mut:#9aa3b5;--bd:#2a2f3d;--ac:#818cf8;--ok:#4ade80;--no:#6b7280}
+*{box-sizing:border-box}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--bg);color:var(--tx);font:15px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+.w{max-width:960px;margin:0 auto;padding:20px 16px 40px}
+h1{font-size:22px;margin:0 0 4px}
+.sub{color:var(--mut);margin:0 0 18px;font-size:14px}
+.tabs{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.tab{background:var(--card);border:2px solid var(--bd);border-radius:12px;padding:12px 6px;cursor:pointer;color:var(--tx);font:inherit;font-weight:600;display:flex;flex-direction:column;align-items:center;gap:4px}
+.tab .ic{width:30px;height:30px;border-radius:8px;display:grid;place-items:center;color:#fff;font-weight:700;font-size:15px}
+.tab.on{border-color:var(--ac)}
+.sr{display:flex;gap:8px;margin:16px 0 10px}
+input{flex:1;min-width:0;padding:12px 14px;border:1px solid var(--bd);border-radius:10px;background:var(--card);color:var(--tx);font:inherit}
+.btn{background:var(--ac);color:#fff;border:0;border-radius:10px;padding:10px 16px;font:inherit;font-weight:600;cursor:pointer}
+.btn.o{background:transparent;color:var(--ac);border:1.5px solid var(--ac)}
+.fl{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px;align-items:center}
+.chip{border:1px solid var(--bd);background:var(--card);color:var(--tx);border-radius:999px;padding:5px 12px;font:inherit;font-size:13px;cursor:pointer}
+.chip.on{background:var(--ac);color:#fff;border-color:var(--ac)}
+.note{font-size:12.5px;color:var(--mut);background:var(--card);border:1px dashed var(--bd);border-radius:10px;padding:8px 12px;margin-bottom:14px}
+.top{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px}
+.g{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:12px}
+.c{background:var(--card);border:1px solid var(--bd);border-radius:14px;overflow:hidden;display:flex;flex-direction:column}
+.th{height:130px;display:grid;place-items:center;color:#fff;font-size:34px;position:relative}
+.bd{position:absolute;top:8px;left:8px;font-size:11px;font-weight:700;padding:2px 8px;border-radius:999px;background:rgba(0,0,0,.45)}
+.st{position:absolute;top:8px;right:8px;font-size:11px;font-weight:700;padding:2px 8px;border-radius:999px;background:var(--no);color:#fff}
+.st.a{background:var(--ok);color:#04210f}
+.b{padding:12px;display:flex;flex-direction:column;gap:6px;flex:1}
+.b h3{margin:0;font-size:15px}
+.b p{margin:0;color:var(--mut);font-size:13px}
+.m{font-size:12px;color:var(--mut)}
+.ac{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:auto;padding-top:8px}
+.ac .btn{padding:9px 6px;font-size:13px}
+.em{text-align:center;color:var(--mut);padding:40px 10px}
+#t{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:#111;color:#fff;padding:10px 16px;border-radius:10px;font-size:13px;opacity:0;pointer-events:none;transition:.2s;max-width:90%;text-align:center}
+#t.s{opacity:1}
+</style>
+</head>
+<body>
+<div class="w">
+<h1>🔎 Ad Spy Tool</h1>
+<p class="sub">प्लेटफ़ॉर्म चुनें → कीवर्ड डालें → सारे ऐड देखें</p>
+<div class="tabs" id="tabs"></div>
+<div class="sr"><input id="kw" placeholder="कीवर्ड डालें (जैसे: weight loss, shoes…)" autocomplete="off"><button class="btn" id="go">खोजें</button></div>
+<div id="out"></div>
+</div>
+<div id="t"></div>
+<script>
+const P={
+facebook:{n:"Facebook",c:"#1877f2",i:"f",lib:k=>"https://www.facebook.com/ads/library/?active_status=all&ad_type=all&country=ALL&media_type=all&search_type=keyword_unordered&q="+encodeURIComponent(k),libn:"Meta Ad Library",type:["Video","Image"]},
+instagram:{n:"Instagram",c:"#d62976",i:"IG",lib:k=>"https://www.facebook.com/ads/library/?active_status=all&ad_type=all&country=ALL&media_type=all&search_type=keyword_unordered&q="+encodeURIComponent(k),libn:"Meta Ad Library",type:["Video","Image"]},
+youtube:{n:"YouTube",c:"#e11d1d",i:"▶",lib:k=>"https://adstransparency.google.com/?region=anywhere",libn:"Google Ads Transparency",type:["Video"]},
+tiktok:{n:"TikTok",c:"#111827",i:"♪",lib:k=>"https://library.tiktok.com/ads?region=all&query_type=1&adv_name="+encodeURIComponent(k),libn:"TikTok Ad Library",type:["Video"]}
+};
+let cur="facebook",flt="all",data=[],kwd="";
+const $=s=>document.querySelector(s);
+function toast(m){const t=$("#t");t.textContent=m;t.classList.add("s");setTimeout(()=>t.classList.remove("s"),2600)}
+function tabs(){$("#tabs").innerHTML=Object.entries(P).map(([k,p])=>`<button class="tab ${k==cur?"on":""}" data-k="${k}"><span class="ic" style="background:${p.c}">${p.i}</span>${p.n}</button>`).join("")}
+$("#tabs").onclick=e=>{const b=e.target.closest(".tab");if(!b)return;cur=b.dataset.k;tabs();if(kwd)search()}
+$("#kw").onkeydown=e=>{if(e.key==="Enter")search()};$("#go").onclick=search;
+var note="";
+async function search(){
+  kwd=$("#kw").value.trim();
+  if(!kwd){toast("पहले कीवर्ड डालें");return}
+  $("#out").innerHTML='<div class="em">खोज रहा है…</div>';
+  try{const r=await fetch("/api/search?platform="+cur+"&q="+encodeURIComponent(kwd));const j=await r.json();
+  data=j.ads.map((a,i)=>({...a,id:i,start:a.start?String(a.start).slice(0,10):"—"}));note=j.note||""}
+  catch(e){data=[];note="⚠️ सर्वर से कनेक्ट नहीं हुआ: "+e.message}
+  flt="all";render()
+}
+function render(){
+  const p=P[cur],list=data.filter(a=>flt=="all"||(flt=="active"?a.active:!a.active));
+  const na=data.filter(a=>a.active).length;
+  $("#out").innerHTML=`
+  ${note?`<div class="note">${note}</div>`:""}
+  <div class="top"><button class="btn" id="lb">📚 ${p.libn} खोलें</button></div>
+  <div class="fl"><b>${p.n}: ${data.length} ऐड</b>
+  ${[["all","सभी"],["active","Active ("+na+")"],["inactive","Inactive ("+(data.length-na)+")"]].map(([k,l])=>`<button class="chip ${flt==k?"on":""}" data-f="${k}">${l}</button>`).join("")}</div>
+  <div class="g">${list.length?list.map(card).join(""):'<div class="em">कोई ऐड नहीं मिला</div>'}</div>`;
+  $("#lb").onclick=()=>window.open(p.lib(kwd),"_blank","noopener");
+  document.querySelectorAll(".chip").forEach(c=>c.onclick=()=>{flt=c.dataset.f;render()});
+  document.querySelectorAll("[data-o]").forEach(b=>b.onclick=()=>window.open(data[b.dataset.o].url,"_blank","noopener"));
+  document.querySelectorAll("[data-l]").forEach(b=>b.onclick=()=>window.open(data[b.dataset.l].lib||p.lib(kwd),"_blank","noopener"));
+}
+function card(a){
+  const p=P[cur];
+  return `<div class="c"><div class="th" style="background:${a.thumb?`url('${a.thumb}') center/cover,`:""}linear-gradient(135deg,${p.c},#6d28d9)">${a.type=="Video"?"▶":"🖼"}<span class="bd">${a.type}</span><span class="st ${a.active?"a":""}">${a.active?"Active":"Inactive"}</span></div>
+  <div class="b"><h3>${a.brand}</h3><p>${a.text}</p><div class="m">शुरू: ${a.start}</div>
+  <div class="ac"><button class="btn" data-o="${a.id}" ${a.url?"":"disabled"}>${a.type=="Video"?"▶ Original Ad":"🖼 Original Ad"}</button><button class="btn o" data-l="${a.id}">📚 Ad Library</button></div></div></div>`
+}
+tabs();
+</script>
+</body>
+</html>
