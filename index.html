@@ -43,6 +43,7 @@ input{flex:1;min-width:0;padding:12px 14px;border:1px solid var(--bd);border-rad
 .em{text-align:center;color:var(--mut);padding:40px 10px}
 #t{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:#111;color:#fff;padding:10px 16px;border-radius:10px;font-size:13px;opacity:0;pointer-events:none;transition:.2s;max-width:90%;text-align:center}
 #t.s{opacity:1}
+#md{position:fixed;inset:0;background:rgba(0,0,0,.75);display:none;align-items:center;justify-content:center;padding:calc(16px + env(safe-area-inset-top,0px)) 16px calc(16px + env(safe-area-inset-bottom,0px));z-index:20}#md.s{display:flex}.mc{background:var(--card);border-radius:14px;max-width:480px;width:100%;max-height:88vh;overflow:auto;padding:14px;position:relative}.mc h3{margin:0 40px 8px 0}.mc video,.mc img{width:100%;border-radius:10px;max-height:60vh;object-fit:contain;background:#000}#mx{position:absolute;top:8px;right:8px;border:0;background:var(--bd);color:var(--tx);border-radius:50%;width:32px;height:32px;font-size:16px;cursor:pointer}
 </style>
 </head>
 <body>
@@ -53,6 +54,7 @@ input{flex:1;min-width:0;padding:12px 14px;border:1px solid var(--bd);border-rad
 <div class="sr"><input id="kw" placeholder="कीवर्ड डालें (जैसे: weight loss, shoes…)" autocomplete="off"><button class="btn" id="go">खोजें</button></div>
 <div id="out"></div>
 </div>
+<div id="md"><div class="mc"><button id="mx">✕</button><div id="mb"></div></div></div>
 <div id="t"></div>
 <script>
 const P={
@@ -88,14 +90,26 @@ function render(){
   <div class="g">${list.length?list.map(card).join(""):'<div class="em">कोई ऐड नहीं मिला</div>'}</div>`;
   $("#lb").onclick=()=>window.open(p.lib(kwd),"_blank","noopener");
   document.querySelectorAll(".chip").forEach(c=>c.onclick=()=>{flt=c.dataset.f;render()});
+  document.querySelectorAll("[data-v]").forEach(b=>b.onclick=()=>openAd(+b.dataset.v));
   document.querySelectorAll("[data-o]").forEach(b=>b.onclick=()=>window.open(data[b.dataset.o].url,"_blank","noopener"));
   document.querySelectorAll("[data-l]").forEach(b=>b.onclick=()=>window.open(data[b.dataset.l].lib||p.lib(kwd),"_blank","noopener"));
 }
+const esc=s=>String(s==null?"":s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+function closeAd(){$("#md").classList.remove("s");$("#mb").innerHTML=""}
+function openAd(i){
+  const a=data[i];
+  if(!a.media){window.open(a.lib||P[cur].lib(kwd),"_blank","noopener");toast("इस ऐड की फ़ाइल नहीं मिली, Ad Library खोल रहा हूँ");return}
+  $("#mb").innerHTML=`<h3>${esc(a.brand)}</h3>`+(a.type=="Video"?`<video controls autoplay playsinline referrerpolicy="no-referrer" poster="${esc(a.thumb)}" src="${esc(a.media)}"></video>`:`<img referrerpolicy="no-referrer" src="${esc(a.media)}">`)+`<p>${esc(a.text)}</p><div class="m">शुरू: ${esc(a.start)}</div>`;
+  const el=$("#mb").querySelector("video,img");
+  el.onerror=()=>{el.insertAdjacentHTML("afterend","<p>⚠️ फ़ाइल लोड नहीं हुई (लिंक एक्सपायर हो सकता है)। Ad Library से देखें।</p>");el.remove()};
+  $("#md").classList.add("s");
+}
+$("#mx").onclick=closeAd;$("#md").onclick=e=>{if(e.target.id=="md")closeAd()};
 function card(a){
   const p=P[cur];
   return `<div class="c"><div class="th" style="background:${a.thumb?`url('${a.thumb}') center/cover,`:""}linear-gradient(135deg,${p.c},#6d28d9)">${a.type=="Video"?"▶":"🖼"}<span class="bd">${a.type}</span><span class="st ${a.active?"a":""}">${a.active?"Active":"Inactive"}</span></div>
   <div class="b"><h3>${a.brand}</h3><p>${a.text}</p><div class="m">शुरू: ${a.start}</div>
-  <div class="ac"><a class="btn" style="display:block;text-align:center;text-decoration:none;padding:9px 6px;font-size:13px" href="${(a.url||a.lib||p.lib(kwd)).replace(/"/g,"%22")}" target="_blank" rel="noopener noreferrer">📄 Original Ad (FB Page)</a><a class="btn o" style="display:block;text-align:center;text-decoration:none;padding:9px 6px;font-size:13px" href="${(a.lib||p.lib(kwd)).replace(/"/g,"%22")}" target="_blank" rel="noopener noreferrer">📚 Ad Library</a>${a.media?`<a class="btn o" style="grid-column:1/-1;display:block;text-align:center;text-decoration:none;padding:9px 6px;font-size:13px" href="${a.media.replace(/"/g,"%22")}" target="_blank" rel="noopener noreferrer">${a.type=="Video"?"▶ Video":"🖼 Image"} खोलें</a>`:""}</div></div>`
+  <div class="ac"><button class="btn" data-v="${a.id}">${a.type=="Video"?"▶":"🖼"} Original Ad देखें</button><a class="btn o" style="display:block;text-align:center;text-decoration:none;padding:9px 6px;font-size:13px" href="${(a.lib||p.lib(kwd)).replace(/"/g,"%22")}" target="_blank" rel="noopener noreferrer">📚 Ad Library</a>${a.url?`<a class="btn o" style="grid-column:1/-1;display:block;text-align:center;text-decoration:none;padding:9px 6px;font-size:13px" href="${a.url.replace(/"/g,"%22")}" target="_blank" rel="noopener noreferrer">📄 Facebook Page खोलें</a>`:""}</div></div>`
 }
 tabs();
 </script>
