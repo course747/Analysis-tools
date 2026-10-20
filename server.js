@@ -39,19 +39,24 @@ function libUrl(q, plat, status) {
 function mapAd(a) {
   const s = a.snapshot || {};
   const id = a.adArchiveID || a.ad_archive_id || a.adArchiveId || a.id;
-  const vid = s.videos?.[0] || a.videos?.[0];
-  const img = s.images?.[0] || a.images?.[0];
-  const media = vid?.video_hd_url || vid?.video_sd_url || vid?.videoHdUrl || img?.original_image_url || img?.resized_image_url;
+  const c = s.cards?.[0] || {};
+  const v = s.videos?.[0] || {};
+  const im = s.images?.[0] || {};
+  const vurl = v.video_hd_url || v.video_sd_url || v.videoHdUrl || c.video_hd_url || c.video_sd_url || c.videoHdUrl;
+  const iurl = im.original_image_url || im.resized_image_url || c.original_image_url || c.resized_image_url || c.originalImageUrl;
+  const thumb = v.video_preview_image_url || v.videoPreviewImageUrl || c.video_preview_image_url || iurl || "";
   const active = a.isActive ?? a.is_active;
+  const lib = id ? "https://www.facebook.com/ads/library/?id=" + id : "";
   return {
     brand: a.pageName || a.page_name || s.page_name || s.pageName || "—",
-    text: (s.body?.text || s.body || a.text || s.title || "").toString().slice(0, 160),
-    type: vid ? "Video" : "Image",
+    text: (s.body?.text || (typeof s.body === "string" ? s.body : "") || c.body || a.text || s.title || "").toString().slice(0, 160),
+    type: vurl ? "Video" : "Image",
     active: active === undefined ? !(a.endDate || a.end_date) : !!active,
     start: a.startDateFormatted || a.startDate || a.start_date || "",
-    lib: id ? "https://www.facebook.com/ads/library/?id=" + id : "",
-    url: media || s.link_url || s.page_profile_uri || "",
-    thumb: vid?.video_preview_image_url || vid?.videoPreviewImageUrl || img?.resized_image_url || "",
+    lib,
+    url: vurl || iurl || lib || s.link_url || s.page_profile_uri || "",
+    page: s.page_profile_uri || "",
+    thumb,
   };
 }
 async function facebook(q, plat, raw) {
