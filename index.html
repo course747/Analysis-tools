@@ -95,7 +95,7 @@ function card(a){
   const p=P[cur];
   return `<div class="c"><div class="th" style="background:${a.thumb?`url('${a.thumb}') center/cover,`:""}linear-gradient(135deg,${p.c},#6d28d9)">${a.type=="Video"?"▶":"🖼"}<span class="bd">${a.type}</span><span class="st ${a.active?"a":""}">${a.active?"Active":"Inactive"}</span></div>
   <div class="b"><h3>${a.brand}</h3><p>${a.text}</p><div class="m">शुरू: ${a.start}</div>
-  <div class="ac"><button class="btn" data-o="${a.id}" ${a.url?"":"disabled"}>${a.type=="Video"?"▶ Original Ad":"🖼 Original Ad"}</button><button class="btn o" data-l="${a.id}">📚 Ad Library</button></div></div></div>`
+  <div class="ac"><a class="btn" style="display:block;text-align:center;text-decoration:none;padding:9px 6px;font-size:13px" href="${(a.url||a.lib||p.lib(kwd)).replace(/"/g,"%22")}" target="_blank" rel="noopener noreferrer">${a.type=="Video"?"▶ Original Ad":"🖼 Original Ad"}</a><a class="btn o" style="display:block;text-align:center;text-decoration:none;padding:9px 6px;font-size:13px" href="${(a.lib||p.lib(kwd)).replace(/"/g,"%22")}" target="_blank" rel="noopener noreferrer">📚 Ad Library</a></div></div>`
 }
 tabs();
 </script>
